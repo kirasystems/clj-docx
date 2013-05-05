@@ -2,11 +2,7 @@
   (:import
    (org.docx4j.openpackaging.packages WordprocessingMLPackage)
    (org.docx4j.openpackaging.parts.WordprocessingML MainDocumentPart)
-   (org.docx4j.wml Body)
-   (org.docx4j.wml P)
-   (org.docx4j.wml R)
-   (org.docx4j.wml Br)
-   (org.docx4j.wml STBrType)
+   (org.docx4j.wml Body P R Br STBrType)
    (org.docx4j XmlUtils)))
 
 (defn load-wordml-pkg [filename]
@@ -122,9 +118,27 @@
   (first
    (find-rows-with-string rows match-str)))
 
+;; Cloning helpers
+
 (defn clone-el [elem]
   "Clones Element"
   (XmlUtils/deepCopy elem))
+
+(defn clear-content! [parent]
+  "Helper to wipe elements for anything 
+   which implements the org.docx4j.wml Interface
+   ContentAccessor"
+  (-> parent
+      (.getContent)
+      (.clear)))
+
+(defn add-elem! [parent elem]
+  "Helper to add an element to anything 
+   which implements the org.docx4j.wml Interface
+   ContentAccessor."
+  (-> parent
+      (.getContent)
+      (.add elem)))
 
 (defn set-cell-text! [cell-el string]
   "Sets text in cell by cloning the contents to 
@@ -147,22 +161,6 @@
         r       (new R)
         br      (new Br)]
     (.setType br (STBrType/PAGE))
-    (.add (.getContent r) br)
-    (.add (.getContent p) r)
+    (add-elem! r br)
+    (add-elem! p r)
     p))
-
-(defn clear-content! [parent]
-  "Helper to wipe elements for anything 
-   which implements the org.docx4j.wml Interface
-   ContentAccessor"
-  (-> parent
-      (.getContent)
-      (.clear)))
-
-(defn add-elem! [parent elem]
-  "Helper to add an element to anything 
-   which implements the org.docx4j.wml Interface
-   ContentAccessor"
-  (-> parent
-      (.getContent)
-      (.add elem)))
