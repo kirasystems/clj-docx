@@ -3,6 +3,10 @@
    (org.docx4j.openpackaging.packages WordprocessingMLPackage)
    (org.docx4j.openpackaging.parts.WordprocessingML MainDocumentPart)
    (org.docx4j.wml Body)
+   (org.docx4j.wml P)
+   (org.docx4j.wml R)
+   (org.docx4j.wml Br)
+   (org.docx4j.wml STBrType)
    (org.docx4j XmlUtils)))
 
 (defn load-wordml-pkg [filename]
@@ -118,5 +122,47 @@
   (first
    (find-rows-with-string rows match-str)))
 
-(defn new-p-with-string [string])
-  
+(defn clone-el [elem]
+  "Clones Element"
+  (XmlUtils/deepCopy elem))
+
+(defn set-cell-text! [cell-el string]
+  "Sets text in cell by cloning the contents to 
+   maintain styling, removing all content and then
+   re-inserting cloned content with new text.
+   Side-effects are confined to the cell that is
+   passed in."
+  (let [p    (-> cell-el (.getContent) first clone-el)
+        r    (-> p (.getContent) first clone-el)
+        text (-> r (.getContent) first .getValue)]
+    (clear-content! cell-el)
+    (clear-content! p)
+    (.setValue text string)
+    (add-elem! p r)
+    (add-elem! cell-el p)))
+
+(defn create-page-br []
+  "Helper to create page break element"
+  (let [p       (new P)
+        r       (new R)
+        br      (new Br)]
+    (.setType br (STBrType/PAGE))
+    (.add (.getContent r) br)
+    (.add (.getContent p) r)
+    p))
+
+(defn clear-content! [parent]
+  "Helper to wipe elements for anything 
+   which implements the org.docx4j.wml Interface
+   ContentAccessor"
+  (-> parent
+      (.getContent)
+      (.clear)))
+
+(defn add-elem! [parent elem]
+  "Helper to add an element to anything 
+   which implements the org.docx4j.wml Interface
+   ContentAccessor"
+  (-> parent
+      (.getContent)
+      (.add elem)))

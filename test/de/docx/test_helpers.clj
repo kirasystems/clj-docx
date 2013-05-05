@@ -24,5 +24,5 @@
   (extract-tbl-rows
    (tbl-from-default-fixture-file)))
 
-(defn dump-body-xml [body]
-  (XmlUtils/marshaltoString body true true))
+(defn dump-xml [elem]
+  (XmlUtils/marshaltoString elem true true))

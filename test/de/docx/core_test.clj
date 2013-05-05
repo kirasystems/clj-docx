@@ -1,9 +1,11 @@
 (ns de.docx.core-test
   (:import
+   (org.docx4j.openpackaging.packages WordprocessingMLPackage)
    (org.docx4j XmlUtils)
    (org.docx4j.wml ObjectFactory))
   (:use clojure.test
-        de.docx.core))
+        de.docx.core
+        de.docx.test-helpers))
 
 (deftest word-ml
 
@@ -63,48 +65,52 @@
                (text-at-cell
                 (first (row-cells matching-row-2)))))))
 
-    ;;
-    ;; THIS IS A SPRINT...WILL BE REWRITTEN
-    ;;
-    (testing "Updates TC text"
-      (let [document-row (.getContent
-                          (find-first-row-with-string
-                           rows "[Document Identifier]"))
+    (testing "Clones Element"
+      (let [document-row   (find-first-row-with-string
+                            rows "[Document Identifier]")
+            cloned-doc-row (clone-el document-row)]
+        (is (= (type document-row) (type cloned-doc-row)))
+        (is (not= (str document-row) (str cloned-doc-row)))))
 
-            document-cell (.getContent
-                           (first
-                            (.getContent
-                             (.getValue (first document-row)))))
+    (testing "Sets Text for cell"
+      (let [document-row   (find-first-row-with-string
+                            rows "[Document Identifier]")
+            cloned-doc-row (clone-el document-row)
+            first-cell     (first (row-cells cloned-doc-row))]
+        (set-cell-text! first-cell "New Text!")
+        (is (= (text-at-cell first-cell) "New Text!"))))
 
-            docR-copy (XmlUtils/deepCopy (first document-cell))
+    ;; Again, spike...will be re-written,
+    ;; but illustrates basic DSL usage
+    (testing "Constructs doc with multiple tables
+              and page break from cloned elements"
+      (let [tbl                (clone-el tbl)
+            document-row       (clone-el
+                                (find-first-row-with-string
+                                 rows "[Document Identifier]"))
+            document-text-cell (first (row-cells document-row))
+            party-row          (clone-el
+                                (find-first-row-with-string
+                                 rows "Parties"))
+            party-text-cell-1  (first (row-cells party-row))
+            party-text-cell-2  (second (row-cells party-row))
+]
 
-            document-text  (.getValue
-                            (first
-                             (.getContent docR-copy)))
+        (set-cell-text! document-text-cell "[My AWESOME DOCUMENT]")
+        (set-cell-text! party-text-cell-1  "MY PARTIES")
+        (set-cell-text! party-text-cell-2  "A list of parties 1) one 2) two 3) three")
 
-            title-row      (.getContent
-                            (find-first-row-with-string rows "Title"))
-            title-label-cell (.getContent
-                              (.getValue (first title-row)))
-            title-conts-cell (.getContent
-                              (.getValue (second title-row)))
+        (clear-content! body)
+        (clear-content! tbl)
+        (add-elem! tbl document-row)
+        (add-elem! tbl party-row)
+        (add-elem! body tbl)
+        (add-elem! body (create-page-br))
+        (add-elem! body tbl)
 
-            lp        (.getContent (first title-label-cell))
-            cp        (.getContent (first title-conts-cell))
-            ]
-
-        (.clear document-cell)
-        (.setValue document-text "[THIS IS MY DOCUMENT NAME HERE GUYS]")
-        (.add document-cell docR-copy)
-
-        (println document-cell)
-        (println (.getValue document-text))
-
-        (.setValue (first (.getContent (first lp))) "Label")
-        (.setValue (first (.getContent (first cp))) "Some Contents")
-
-        (.save wordml-pkg (java.io.File. "test/fixtures/save-test.docx"))
-        ))
+        (.save wordml-pkg
+               (java.io.File. "test/fixtures/save-test.docx"))
+))
 
     ) ;; let
   ) ;; deftest
