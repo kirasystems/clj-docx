@@ -80,6 +80,19 @@
         (set-cell-text! first-cell "New Text!")
         (is (= (text-at-cell first-cell) "New Text!"))))
 
+    (testing "Sets sets multiple Texts w/line break for cell"
+      (let [parties-row   (find-first-row-with-string
+                            rows "Parties")
+            cloned-doc-row (clone-el parties-row)
+            first-cell     (first (row-cells cloned-doc-row))
+            set-cell       (set-cell-text! first-cell "New Text!<br>After a line break!")
+            cell-content   (.getContent first-cell)
+            second-cell-br (-> cell-content
+                               second (.getContent) first (.getContent) first)]
+
+        (is (= 3 (count cell-content)))
+        (is (= org.docx4j.wml.Br (type second-cell-br)))))
+
     ;; Again, spike...will be re-written,
     ;; but illustrates basic DSL usage
     (testing "Constructs doc with multiple tables
@@ -108,8 +121,8 @@
         (add-elem! body (create-page-br))
         (add-elem! body tbl)
 
-        (.save wordml-pkg
-               (java.io.File. "test/fixtures/save-test.docx"))
+;;        (.save wordml-pkg
+;;               (java.io.File. "test/fixtures/save-test.docx"))
 ))
 
     ) ;; let

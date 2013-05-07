@@ -2,7 +2,7 @@
   (:import
    (org.docx4j.openpackaging.packages WordprocessingMLPackage)
    (org.docx4j.openpackaging.parts.WordprocessingML MainDocumentPart)
-   (org.docx4j.wml Body P R Br STBrType)
+   (org.docx4j.wml Body P R Br Text STBrType)
    (org.docx4j XmlUtils)))
 
 (defn load-wordml-pkg [filename]
@@ -140,27 +140,51 @@
       (.getContent)
       (.add elem)))
 
+(defn cloned-p-with-text
+  "Creates a P, creates the Text w/string and
+   inserts it in the P with the necessary R wrapper."
+  [cloned-p string]
+  (let [p       (clone-el cloned-p)
+        r       (-> p (.getContent) first clone-el)
+        text    (-> r (.getContent) first .getValue)]
+    (clear-content! p)
+    (.setValue text string)
+    (add-elem! r text)
+    (add-elem! p r)
+    p))
+
 (defn set-cell-text! [cell-el string]
   "Sets text in cell by cloning the contents to 
    maintain styling, removing all content and then
    re-inserting cloned content with new text.
    Side-effects are confined to the cell that is
-   passed in."
-  (let [p    (-> cell-el (.getContent) first clone-el)
-        r    (-> p (.getContent) first clone-el)
-        text (-> r (.getContent) first .getValue)]
+   passed in. Adds breaks when encountering HTML <br />."
+  (let [cloned-p (-> cell-el (.getContent) first clone-el)   ; assumes first is P...will always be?
+        strings  (clojure.string/split string #"<br[ /]*>")]
     (clear-content! cell-el)
-    (clear-content! p)
-    (.setValue text string)
-    (add-elem! p r)
-    (add-elem! cell-el p)))
+    (add-elem!
+     cell-el (cloned-p-with-text cloned-p (first strings)))
 
-(defn create-page-br []
-  "Helper to create page break element"
+    (doseq [strn (rest strings)]
+      ;; Add line break
+      (add-elem!
+       cell-el
+       (create-br STBrType/TEXT_WRAPPING))
+      ;; Add next string
+      (add-elem!
+       cell-el
+       (cloned-p-with-text cloned-p strn)))))
+
+(defn create-br [type]
+  "Helper to create break element"
   (let [p       (new P)
         r       (new R)
         br      (new Br)]
-    (.setType br (STBrType/PAGE))
+    (.setType br type)
     (add-elem! r br)
     (add-elem! p r)
     p))
+
+(defn create-page-br []
+  "Helper to create page break element"
+  (create-br STBrType/PAGE))
