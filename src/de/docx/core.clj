@@ -171,10 +171,13 @@
    passed in. Adds breaks when encountering HTML <br />."
   (let [cloned-p (-> cell-el (.getContent) first clone-el)   ; assumes first is P...will always be?
         strings  (clojure.string/split string #"<br[ /]*>")]
+    ;; Clear out cell contents to start fresh
     (clear-content! cell-el)
+    ;; Add first (and potentially last) element
     (add-elem!
      cell-el (cloned-p-with-text cloned-p (first strings)))
 
+    ;; Loop through any other strings found:
     (doseq [strn (rest strings)]
       ;; Add line break
       (add-elem!
@@ -182,8 +185,7 @@
        (create-br STBrType/TEXT_WRAPPING))
       ;; Add next string
       (add-elem!
-       cell-el
-       (cloned-p-with-text cloned-p strn)))))
+       cell-el (cloned-p-with-text cloned-p strn)))))
 
 (defn create-page-br []
   "Helper to create page break element"
