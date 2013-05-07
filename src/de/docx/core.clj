@@ -172,13 +172,25 @@
     (add-elem! p r)
     p))
 
+(defn clean-p
+  "Returns only R-filled P"
+  [p]
+  (let [contents       (.getContent p)
+        clean-contents (filter
+                        #(= (type %1) org.docx4j.wml.R)
+                        contents)
+        first-r        (-> clean-contents first clone-el)]
+    (clear-content! p)
+    (add-elem! p first-r)
+    p))
+
 (defn set-cell-text! [cell-el string]
   "Sets text in cell by cloning the contents to 
    maintain styling, removing all content and then
    re-inserting cloned content with new text.
    Side-effects are confined to the cell that is
    passed in. Adds breaks when encountering HTML <br />."
-  (let [cloned-p (-> cell-el (.getContent) first clone-el)   ; assumes first is P...will always be?
+  (let [cloned-p (-> cell-el (.getContent) first clone-el clean-p)
         strings  (clojure.string/split string #"<br[ /]*>")]
     ;; Clear out cell contents to start fresh
     (clear-content! cell-el)

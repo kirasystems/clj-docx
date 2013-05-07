@@ -5,9 +5,12 @@
    de.docx.core
    clojure.test))
 
-(defn do-reload-and-run-tests []
+(defn do-reload []
   (use 'de.docx.core :reload)
-  (use 'de.docx.core-test :reload)
+  (use 'de.docx.core-test :reload))
+
+(defn do-reload-and-run-tests []
+  (do-reload)
   (run-tests 'de.docx.core-test))
 
 (defn tbl-from-file

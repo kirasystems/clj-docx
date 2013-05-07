@@ -135,3 +135,22 @@
 
     ) ;; let
   ) ;; deftest
+
+(deftest bug-fix
+  (let [filename    "test/fixtures/proofErr-fixture.docx"
+        wordml-pkg  (load-wordml-pkg filename)
+        body        (extract-body-from-pkg wordml-pkg)
+        tbl         (extract-tbl-from-body body)
+        rows        (extract-tbl-rows tbl)]
+
+    (testing "If it attempts to clone a proofErr item from cell for
+              text replacement, ignores it and find the next P"
+      (let [document-row   (find-first-row-with-string
+                            rows "FSInvestmentCORP")
+            cloned-doc-row (clone-el document-row)
+            first-cell     (first (row-cells cloned-doc-row))]
+        (set-cell-text! first-cell "New Text!")
+        (is (= (text-at-cell first-cell) "New Text!"))))
+
+    ) ;; let
+  ) ;; deftest
