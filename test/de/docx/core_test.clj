@@ -50,10 +50,10 @@
 
     (testing "Returns TR by string match"
       (let [matching-row-1 (find-first-row-with-string
-                             rows
-                             "[Document Identifier (e.g., FSInvestmentCORP INVESTMENT MANAGEMENT AGR (aka 371))]")
+                            rows
+                            "[Document Identifier (e.g., FSInvestmentCORP INVESTMENT MANAGEMENT AGR (aka 371))]")
             matching-row-2 (find-first-row-with-string
-                             rows "Parties")]
+                            rows "Parties")]
         (is (= org.docx4j.wml.Tr (type matching-row-1)))
 
         ;; These two tests kinda hacky. Hmm.
@@ -74,7 +74,7 @@
 
     (testing "Sets Text for cell"
       (let [document-row   (find-first-row-with-string
-                            rows "[Document Identifier]")
+                            rows "Document Identifier")
             cloned-doc-row (clone-el document-row)
             first-cell     (first (row-cells cloned-doc-row))]
         (set-cell-text! first-cell "New Text!")
@@ -82,16 +82,24 @@
 
     (testing "Sets sets multiple Texts w/line break for cell"
       (let [parties-row   (find-first-row-with-string
-                            rows "Parties")
+                           rows "Parties")
             cloned-doc-row (clone-el parties-row)
             first-cell     (first (row-cells cloned-doc-row))
-            set-cell       (set-cell-text! first-cell "New Text!<br>After a line break!")
+            set-cell       (set-cell-text! first-cell "New Text!<br>After a line break!<br />And another!")
             cell-content   (.getContent first-cell)
-            second-cell-br (-> cell-content
+            cell-first-r   (-> cell-content
+                               first (.getContent) first)
+            cell-second-br (-> cell-content
                                second (.getContent) first (.getContent) first)]
 
-        (is (= 3 (count cell-content)))
-        (is (= org.docx4j.wml.Br (type second-cell-br)))))
+        ;; Introduced bug where it reproduces the Text: must clear R!
+        (is (= nil
+               (re-find
+                #"<w:t>New Text!</w:t>\s*<w:t>New Text!</w:t>"
+                (dump-xml cell-first-r))))
+
+        (is (= 5 (count cell-content)))
+        (is (= org.docx4j.wml.Br (type cell-second-br)))))
 
     ;; Again, spike...will be re-written,
     ;; but illustrates basic DSL usage
@@ -107,11 +115,11 @@
                                  rows "Parties"))
             party-text-cell-1  (first (row-cells party-row))
             party-text-cell-2  (second (row-cells party-row))
-]
+            ]
 
         (set-cell-text! document-text-cell "[My AWESOME DOCUMENT]")
         (set-cell-text! party-text-cell-1  "MY PARTIES")
-        (set-cell-text! party-text-cell-2  "A list of parties 1) one 2) two 3) three")
+        (set-cell-text! party-text-cell-2  "A list of parties<br /> 1) one<br> 2) two<br /> 3) three")
 
         (clear-content! body)
         (clear-content! tbl)
@@ -121,9 +129,9 @@
         (add-elem! body (create-page-br))
         (add-elem! body tbl)
 
-;;        (.save wordml-pkg
-;;               (java.io.File. "test/fixtures/save-test.docx"))
-))
+        (.save wordml-pkg
+               (java.io.File. "test/fixtures/save-test.docx"))
+        ))
 
     ) ;; let
   ) ;; deftest

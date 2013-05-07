@@ -56,30 +56,38 @@
       (row-at idx)
       row-cells))
 
-(defn extract-text-from-R-els [R-els]
+(defn get-text-from-el
+  "In some cases our elements are going to be a Text
+   element, in some cases Jaxb holding a Text element.
+   We get the string out of either here."
+  [elem]
+  (let [e-type (type elem)]
+  (cond
+    (= javax.xml.bind.JAXBElement e-type) (.getValue (.getValue elem))
+    (= org.docx4j.wml.Text e-type)        (.getValue elem)
+    :else "")))
+
+(defn extract-text-from-R-els
   "Extracts and concatenates strings from the
    collection of Text elements from a R element."
-  (let [text-els (filter
-                  #(= org.docx4j.wml.Text
-                      (type (.getValue %1)))
-                  R-els)]
+  [R-els]
     (reduce
-     #(str %1 (-> %2 .getValue .getValue))
-     "" text-els)))
+     #(str %1 (get-text-from-el %2))
+     "" R-els))
 
-(defn extract-text-from-R [elem]
+(defn extract-text-from-R
   "Extracts string from R element."
-  (if (= org.docx4j.wml.R
-         (type elem))
+  [elem]
+  (if (= org.docx4j.wml.R (type elem))
     (extract-text-from-R-els
-     (.getRunContent elem))))
+     (.getContent elem))))
 
 (defn text-at-cell [cell]
   (reduce
    #(str %1 (extract-text-from-R %2))
    ""
    (-> cell
-       .getEGBlockLevelElts
+       .getContent
        first ; hmm...always just one?
        .getParagraphContent)))
 
@@ -146,8 +154,9 @@
   [cloned-p string]
   (let [p       (clone-el cloned-p)
         r       (-> p (.getContent) first clone-el)
-        text    (-> r (.getContent) first .getValue)]
+        text    (-> r (.getContent) first .getValue clone-el)]
     (clear-content! p)
+    (clear-content! r)
     (.setValue text string)
     (add-elem! r text)
     (add-elem! p r)
