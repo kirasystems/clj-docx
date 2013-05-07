@@ -153,6 +153,16 @@
     (add-elem! p r)
     p))
 
+(defn create-br [type]
+  "Helper to create break element"
+  (let [p       (new P)
+        r       (new R)
+        br      (new Br)]
+    (.setType br type)
+    (add-elem! r br)
+    (add-elem! p r)
+    p))
+
 (defn set-cell-text! [cell-el string]
   "Sets text in cell by cloning the contents to 
    maintain styling, removing all content and then
@@ -174,16 +184,6 @@
       (add-elem!
        cell-el
        (cloned-p-with-text cloned-p strn)))))
-
-(defn create-br [type]
-  "Helper to create break element"
-  (let [p       (new P)
-        r       (new R)
-        br      (new Br)]
-    (.setType br type)
-    (add-elem! r br)
-    (add-elem! p r)
-    p))
 
 (defn create-page-br []
   "Helper to create page break element"
