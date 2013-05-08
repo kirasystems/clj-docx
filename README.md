@@ -1,8 +1,12 @@
-# de.docx
+# clj-docx
 
-Wraps up docx4j for usage with DiligenceEngine software, in particular de.web.
+*EXPERIMENTAL*
 
-## Usage
+Wraps docx4java functionality up in Clojure, attempting to provide a more functional way to manipulate OpenML.
+
+Currently only deals with some aspects of WordProcessing ML.  Contributions welcome.
+
+## Usage Examples
 
 TODO
 
@@ -11,10 +15,12 @@ TODO
 In REPL:
 
 ```clojure
-user=> (use 'de.docx.test-helpers)
+user=> (use 'clj-docx.test-helpers)
 user=> (do-reload-and-run-tests)
 ```
 
 ## License
 
-All Rights Reserved, Copyright © 2013 DiligenceEngine
+[MIT License](http://opensource.org/licenses/MIT)
+
+© 2013 DiligenceEngine

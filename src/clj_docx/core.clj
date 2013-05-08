@@ -1,4 +1,4 @@
-(ns de.docx.core
+(ns clj-docx.core
   (:import
    (org.docx4j.openpackaging.packages WordprocessingMLPackage)
    (org.docx4j.openpackaging.parts.WordprocessingML MainDocumentPart)
@@ -133,7 +133,7 @@
   (XmlUtils/deepCopy elem))
 
 (defn clear-content! [parent]
-  "Helper to wipe elements for anything 
+  "Helper to wipe elements for anything
    which implements the org.docx4j.wml Interface
    ContentAccessor"
   (-> parent
@@ -141,7 +141,7 @@
       (.clear)))
 
 (defn add-elem! [parent elem]
-  "Helper to add an element to anything 
+  "Helper to add an element to anything
    which implements the org.docx4j.wml Interface
    ContentAccessor."
   (-> parent
@@ -185,7 +185,7 @@
     p))
 
 (defn set-cell-text! [cell-el string]
-  "Sets text in cell by cloning the contents to 
+  "Sets text in cell by cloning the contents to
    maintain styling, removing all content and then
    re-inserting cloned content with new text.
    Side-effects are confined to the cell that is
@@ -200,10 +200,6 @@
 
     ;; Loop through any other strings found:
     (doseq [strn (rest strings)]
-      ;; Add line break
-      (add-elem!
-       cell-el
-       (create-br STBrType/TEXT_WRAPPING))
       ;; Add next string
       (add-elem!
        cell-el (cloned-p-with-text cloned-p strn)))))
@@ -211,3 +207,9 @@
 (defn create-page-br []
   "Helper to create page break element"
   (create-br STBrType/PAGE))
+
+(defn dump-xml
+  "Returns rendered ('marshalled') XML for
+  element via docx4j's XmlUtils."
+  [elem]
+  (XmlUtils/marshaltoString elem true true))

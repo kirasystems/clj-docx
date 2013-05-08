@@ -1,11 +1,11 @@
-(ns de.docx.core-test
+(ns clj-docx.core-test
   (:import
    (org.docx4j.openpackaging.packages WordprocessingMLPackage)
    (org.docx4j XmlUtils)
    (org.docx4j.wml ObjectFactory))
   (:use clojure.test
-        de.docx.core
-        de.docx.test-helpers))
+        clj-docx.core
+        clj-docx.test-helpers))
 
 (deftest word-ml
 
@@ -80,7 +80,7 @@
         (set-cell-text! first-cell "New Text!")
         (is (= (text-at-cell first-cell) "New Text!"))))
 
-    (testing "Sets sets multiple Texts w/line break for cell"
+    (testing "Splits text after line break into new paragraph(s)."
       (let [parties-row   (find-first-row-with-string
                            rows "Parties")
             cloned-doc-row (clone-el parties-row)
@@ -88,9 +88,7 @@
             set-cell       (set-cell-text! first-cell "New Text!<br>After a line break!<br />And another!")
             cell-content   (.getContent first-cell)
             cell-first-r   (-> cell-content
-                               first (.getContent) first)
-            cell-second-br (-> cell-content
-                               second (.getContent) first (.getContent) first)]
+                               first (.getContent) first)]
 
         ;; Introduced bug where it reproduces the Text: must clear R!
         (is (= nil
@@ -98,8 +96,8 @@
                 #"<w:t>New Text!</w:t>\s*<w:t>New Text!</w:t>"
                 (dump-xml cell-first-r))))
 
-        (is (= 5 (count cell-content)))
-        (is (= org.docx4j.wml.Br (type cell-second-br)))))
+        (is (= 3 (count cell-content)))))
+
 
     ;; Again, spike...will be re-written,
     ;; but illustrates basic DSL usage

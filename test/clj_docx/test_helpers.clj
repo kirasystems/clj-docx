@@ -1,17 +1,17 @@
-(ns de.docx.test-helpers
+(ns clj-docx.test-helpers
   (:import
    (org.docx4j XmlUtils))
   (:use
-   de.docx.core
+   clj-docx.core
    clojure.test))
 
 (defn do-reload []
-  (use 'de.docx.core :reload)
-  (use 'de.docx.core-test :reload))
+  (use 'clj-docx.core :reload)
+  (use 'clj-docx.core-test :reload))
 
 (defn do-reload-and-run-tests []
   (do-reload)
-  (run-tests 'de.docx.core-test))
+  (run-tests 'clj-docx.core-test))
 
 (defn tbl-from-file
   [filename]
@@ -26,6 +26,3 @@
 (defn tbl-rows-from-default-fixture-file []
   (extract-tbl-rows
    (tbl-from-default-fixture-file)))
-
-(defn dump-xml [elem]
-  (XmlUtils/marshaltoString elem true true))
