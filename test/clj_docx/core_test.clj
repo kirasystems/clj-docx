@@ -134,7 +134,7 @@
     ) ;; let
   ) ;; deftest
 
-(deftest bug-fix
+(deftest set-cell-text-ignores-non-text-cells
   (let [filename    "test/fixtures/proofErr-fixture.docx"
         wordml-pkg  (load-wordml-pkg filename)
         body        (extract-body-from-pkg wordml-pkg)
@@ -152,3 +152,16 @@
 
     ) ;; let
   ) ;; deftest
+
+(deftest set-cell-text-deals-with-nil-in-string
+  (let [filename    "test/fixtures/fixture.docx"
+        wordml-pkg  (load-wordml-pkg filename)
+        body        (extract-body-from-pkg wordml-pkg)
+        tbl         (extract-tbl-from-body body)
+        rows        (extract-tbl-rows tbl)
+        row-1       (row-at rows 1)
+        row-1-cells (cells-at-row rows 1)
+        first-cell  (first row-1-cells)]
+
+    (set-cell-text! first-cell nil)
+    (is (= (text-at-cell first-cell) ""))))

@@ -191,7 +191,7 @@
    Side-effects are confined to the cell that is
    passed in. Adds breaks when encountering HTML <br />."
   (let [cloned-p (-> cell-el (.getContent) first clone-el clean-p)
-        strings  (clojure.string/split string #"<br[ /]*>")]
+        strings  (clojure.string/split (or string "") #"<br[ /]*>")]
     ;; Clear out cell contents to start fresh
     (clear-content! cell-el)
     ;; Add first (and potentially last) element
