@@ -56,16 +56,20 @@
       (row-at idx)
       row-cells))
 
+;; Should be a protocol huh?
 (defn get-text-from-el
   "In some cases our elements are going to be a Text
    element, in some cases Jaxb holding a Text element.
    We get the string out of either here."
   [elem]
   (let [e-type (type elem)]
-  (cond
-    (= javax.xml.bind.JAXBElement e-type) (.getValue (.getValue elem))
-    (= org.docx4j.wml.Text e-type)        (.getValue elem)
-    :else "")))
+    (try
+      (cond
+       (= javax.xml.bind.JAXBElement e-type) (.getValue (.getValue elem))
+       (= org.docx4j.wml.Text e-type)        (.getValue elem)
+       :else "")
+      (catch java.lang.IllegalArgumentException e nil)
+      (finally ""))))
 
 (defn extract-text-from-R-els
   "Extracts and concatenates strings from the
