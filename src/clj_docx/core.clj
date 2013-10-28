@@ -3,12 +3,13 @@
    (org.docx4j.openpackaging.packages WordprocessingMLPackage)
    (org.docx4j.openpackaging.parts.WordprocessingML MainDocumentPart)
    (org.docx4j.wml Body P R Br Text STBrType)
-   (org.docx4j XmlUtils)))
+   (org.docx4j XmlUtils))
+  (:require
+   [clojure.java.io :refer [resource]]))
 
 (defn load-wordml-pkg [filename]
   "Loads up a WordML Package object from a file"
-  (WordprocessingMLPackage/load
-   (java.io.File. filename)))
+  (WordprocessingMLPackage/load (resource filename)))
 
 (defn extract-body-from-pkg
   "Extracts Body from a WordML Package"
