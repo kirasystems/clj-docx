@@ -9,7 +9,7 @@
 
 (defn load-wordml-pkg [filename]
   "Loads up a WordML Package object from a file"
-  (WordprocessingMLPackage/load (-> filename resource input-stream)))
+  (WordprocessingMLPackage/load (-> filename input-stream)))
 
 (defn extract-body-from-pkg
   "Extracts Body from a WordML Package"
