@@ -1,4 +1,4 @@
-(defproject clj-docx "0.0.3"
+(defproject clj-docx "0.0.4"
   :description "Wrapper for docx4j"
-  :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.docx4j/docx4j "2.8.1"]])
+  :dependencies [[org.clojure/clojure "1.6.0"]
+                 [org.docx4j/docx4j "3.2.2"]])
