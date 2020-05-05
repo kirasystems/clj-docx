@@ -5,11 +5,11 @@
    (org.docx4j.wml Body P R Br Text STBrType)
    (org.docx4j XmlUtils))
   (:require
-   [clojure.java.io :refer [input-stream resource]]))
+   [clojure.java.io :refer [input-stream resource file]]))
 
 (defn load-wordml-pkg [filename]
   "Loads up a WordML Package object from a file"
-  (WordprocessingMLPackage/load (-> filename resource input-stream)))
+  (WordprocessingMLPackage/load (file filename)))
 
 (defn extract-body-from-pkg
   "Extracts Body from a WordML Package"
